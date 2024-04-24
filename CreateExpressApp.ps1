@@ -24,7 +24,7 @@ npm install express dotenv prisma @prisma/client
 npm install --save-dev typescript @types/node @types/express ts-node
 
 # Initialize TypeScript
-npx tsc --init --rootDir src --outDir dist --esModuleInterop --resolveJsonModule --lib es6,dom --module commonjs
+npx tsc --init --rootDir api --outDir dist --esModuleInterop --resolveJsonModule --lib es6,dom --module commonjs
 
 # Setup Prisma with MongoDB
 npx prisma init
@@ -40,8 +40,8 @@ datasource db {
 "@
 
 # Create necessary folders and files
-New-Item -Path src -ItemType Directory
-Set-Content -Path src\index.ts -Value @"
+New-Item -Path api -ItemType Directory
+Set-Content -Path api\index.ts -Value @"
 import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -90,10 +90,10 @@ Run ``npm start`` to start the server.
 Set-Content -Path vercel.json -Value @"
 {
   "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "dist/index.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ]
 }
@@ -102,7 +102,7 @@ Set-Content -Path vercel.json -Value @"
 # Add scripts to package.json
 $packageJson = Get-Content -Path package.json -Raw | ConvertFrom-Json
 $packageJson.scripts = @{
-    "start" = "ts-node src/index.ts"
+    "start" = "ts-node api/index.ts"
     "build" = "tsc"
 }
 $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path package.json
