@@ -25,6 +25,7 @@ Upon execution, the script will:
 - Add a `README.md` file to your project directory with basic project information and setup instructions.
 - Create a `vercel.json` for deploying with Vercel if needed.
 - Set up a `docker-compose.yml` file to run a MongoDB database locally in a Docker container. This will use a simple username and password for authentication **DO NOT USE IN PRODUCTION**.
+- Create a `tools` directory with powershell scripts to start the server and MongoDB container and to wipe the database.
 
 ## Running Your Project
 

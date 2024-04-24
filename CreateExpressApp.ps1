@@ -107,6 +107,24 @@ $packageJson.scripts = @{
 }
 $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path package.json
 
+# Create a tools folder
+New-Item -Path tools -ItemType Directory
+
+# Create a Start.ps1 script to start the server and database
+Set-Content -Path tools\Start.ps1 -Value @"
+# Start MongoDB Docker container
+docker-compose -f .\db\docker-compose.yml up -d
+
+# Start the server
+npm start
+"@
+
+# Create a WipeDatabase.ps1 script to drop all collections in the database
+Set-Content -Path tools\WipeDatabase.ps1 -Value @"
+# Drop all collections in the database
+docker exec -it mongodb mongo admin --eval 'db.getMongo().getDBNames().forEach(function(i){db.getSiblingDB(i).dropDatabase()})'
+"@
+
 # Create docker-compose.yml for MongoDB, store in ./db folder
 New-Item -Path db -ItemType Directory
 Set-Content -Path db\docker-compose.yml -Value @"
