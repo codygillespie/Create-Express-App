@@ -54,14 +54,14 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(``Server running on port `${PORT}``);
 });
 "@
 
 # Create .env file
 Set-Content -Path .env -Value @"
 PORT=3000
-DATABASE_URL='your-mongodb-connection-string'
+DATABASE_URL='mongodb://admin:password@localhost:27017/mydatabase?authSource=admin'
 "@
 
 # Create .gitignore file
