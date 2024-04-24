@@ -103,7 +103,7 @@ Set-Content -Path vercel.json -Value @"
 $packageJson = Get-Content -Path package.json -Raw | ConvertFrom-Json
 $packageJson.scripts = @{
     "start" = "ts-node api/index.ts"
-    "build" = "tsc"
+    "prisma:push": "npx prisma db push"
 }
 $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path package.json
 
