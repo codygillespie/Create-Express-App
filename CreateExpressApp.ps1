@@ -26,7 +26,7 @@ npm install --save-dev typescript @types/node @types/express ts-node
 # Initialize TypeScript
 npx tsc --init --rootDir api --outDir dist --esModuleInterop --resolveJsonModule --lib es6,dom --module commonjs
 
-# Setup Prisma with MongoDB
+# Setup Prisma with MySQL
 npx prisma init
 Set-Content -Path .\prisma\schema.prisma -Value @"
 generator client {
@@ -34,7 +34,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 "@
@@ -61,7 +61,7 @@ app.listen(PORT, () => {
 # Create .env file
 Set-Content -Path .env -Value @"
 PORT=3000
-DATABASE_URL='mongodb://admin:password@localhost:27017/mydatabase?authSource=admin'
+DATABASE_URL='mysql://admin:password@localhost:3306/db'
 "@
 
 # Create .gitignore file
@@ -75,7 +75,7 @@ dist/
 Set-Content -Path README.md -Value @"
 # $projectName
 
-This project is set up with Express.js, TypeScript, dotenv, and Prisma configured for MongoDB.
+This project is set up with Express.js, TypeScript, dotenv, and Prisma configured for MySQL.
 
 ## Installation
 
@@ -103,7 +103,7 @@ Set-Content -Path vercel.json -Value @"
 $packageJson = Get-Content -Path package.json -Raw | ConvertFrom-Json
 $packageJson.scripts = @{
     "start" = "ts-node api/index.ts"
-    "prisma:push": "npx prisma db push"
+    "prisma:push" = "npx prisma db push"
 }
 $packageJson | ConvertTo-Json -Depth 100 | Set-Content -Path package.json
 
@@ -112,36 +112,34 @@ New-Item -Path tools -ItemType Directory
 
 # Create a Start.ps1 script to start the server and database
 Set-Content -Path tools\Start.ps1 -Value @"
-# Start MongoDB Docker container
+# Start MySQL Docker container
 docker-compose -f .\db\docker-compose.yml up -d
 
 # Start the server
 npm start
 "@
 
-# Create a WipeDatabase.ps1 script to drop all collections in the database
+# Create a WipeDatabase.ps1 script to drop all tables in the database
 Set-Content -Path tools\WipeDatabase.ps1 -Value @"
-# Drop all collections in the database
-docker exec -it mongodb mongo admin --eval 'db.getMongo().getDBNames().forEach(function(i){db.getSiblingDB(i).dropDatabase()})'
+# Drop all tables in the database
+npx prisma migrate reset --force
 "@
 
 # Create docker-compose.yml for MongoDB, store in ./db folder
 New-Item -Path db -ItemType Directory
 Set-Content -Path db\docker-compose.yml -Value @"
-version: '3.8'
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
     ports:
-      - '27017:27017'
-    volumes:
-      - mongodb_data:/data/db
-volumes:
-  mongodb_data:
+      - 3306:3306
 "@
 
 # Initialize git repository
@@ -154,4 +152,4 @@ git add .
 git commit -m "Initial commit"
 
 # Output completion message
-Write-Host "Node.js project setup complete. MongoDB Docker container configured."
+Write-Host "Node.js project setup complete. MySQL Docker container configured."
